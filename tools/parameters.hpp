@@ -1,5 +1,5 @@
-#ifndef TOOLS_EXPERIMENT_HPP
-#define TOOLS_EXPERIMENT_HPP
+#ifndef TOOLS_PARAMETERS_HPP
+#define TOOLS_PARAMETERS_HPP
 #include <stdio.h>
 #include <iostream>
 #include <stdlib.h>
@@ -11,7 +11,7 @@ namespace tools{
 //*****************************************************************************
 
 //Class containing the parameters of the simulation
-class Experiment{
+class Parameters{
 
 public:
    
@@ -54,7 +54,7 @@ public:
     //Model name
     std::string model_;
 
-    Experiment() {
+    Parameters() {
         //Initialize parameter
         nsites_ = 2;
         M_ = 2;

@@ -35,11 +35,11 @@ class Gibbs{
     
 public:
     //Constructor
-    Gibbs(Rbm & rbm,tools::Experiment &exp):rbm_(rbm),nsites_(exp.nsites_),M_(exp.M_),nh_(exp.nh_){
+    Gibbs(Rbm & rbm,tools::Parameters &par):rbm_(rbm),nsites_(par.nsites_),M_(par.M_),nh_(par.nh_){
   
         std::cout<<"- Initializing the sampler: Gibbs"<<std::endl;
         nv_ = (M_+1)*nsites_;
-        nchains_ = exp.nc_;
+        nchains_ = par.nc_;
         std::uniform_int_distribution<int> distribution(0,1);
         
         v_.resize(nchains_,nv_);

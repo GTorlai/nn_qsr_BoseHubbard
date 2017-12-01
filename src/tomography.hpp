@@ -40,7 +40,7 @@ template<class Sampler,class Optimizer> class Tomography {
    
 public:
      
-    Tomography(Basis &basis,Sampler &sampler,Optimizer &optimizer,tools::Experiment &exp):basis_(basis),rbm_(sampler.Rbm()),optimizer_(optimizer),sampler_(sampler){ 
+    Tomography(Basis &basis,Sampler &sampler,Optimizer &optimizer,tools::Parameters &par):basis_(basis),rbm_(sampler.Rbm()),optimizer_(optimizer),sampler_(sampler){ 
         
         std::cout<<"- Initializing tomography module"<<std::endl;
         nv_ = rbm_.Nvisible();
@@ -49,8 +49,8 @@ public:
         M_ = basis_.Nbosons();
         D_ = basis.Dimension();
         npar_=rbm_.Npar();
-        bs_ = exp.bs_;
-        cd_ = exp.cd_;
+        bs_ = par.bs_;
+        cd_ = par.cd_;
         
         optimizer_.SetNpar(npar_);
         grad_.resize(bs_,npar_);

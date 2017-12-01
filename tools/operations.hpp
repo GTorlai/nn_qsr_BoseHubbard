@@ -5,7 +5,7 @@
 #include <iostream>
 #include <cmath>
 #include <Eigen/Core>
-#include "experiment.hpp"
+#include "parameters.hpp"
 //#include <sstream>
 //#include <vector>
 //#include <string>

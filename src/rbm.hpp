@@ -41,7 +41,7 @@ class Rbm{
     std::mt19937 rgen_;
     
 public:
-    Rbm(tools::Experiment &exp):nsites_(exp.nsites_),M_(exp.M_),nh_(exp.nh_),c_(exp.nh_),lnthetas_(exp.nh_){
+    Rbm(tools::Parameters &par):nsites_(par.nsites_),M_(par.M_),nh_(par.nh_),c_(par.nh_),lnthetas_(par.nh_){
        
         nv_ = (M_+1)*nsites_;
         npar_=nv_+nh_+nv_*nh_;
