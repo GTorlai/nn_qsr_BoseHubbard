@@ -34,6 +34,8 @@ public:
     double w_;
     //Order of contrastive divergence
     int cd_;
+    //Number of chains
+    int nc_;
     //Learning rate
     double lr_;
     //L2 normalization
@@ -64,6 +66,7 @@ public:
         nh_ = 2;
         w_ = 0.01;
         cd_ = 10;
+        nc_ = 10;
         lr_ = 0.01;
         l2_ = 0.0;
         bs_ = 100;
@@ -101,6 +104,10 @@ public:
         flag = "-w";
         for(int i=2;i<argc;i++){
             if(flag==argv[i]) w_=double(atof(argv[i+1]));
+        }
+        flag = "-nc";
+        for(int i=2;i<argc;i++){
+            if(flag==argv[i]) nc_=atoi(argv[i+1]);
         }
         flag = "-cd";
         for(int i=2;i<argc;i++){
@@ -150,6 +157,7 @@ public:
         std::cout << " Number of hidden units: " << nh_<< std::endl;
         std::cout << " Initial distribution width: " << w_<< std::endl;
         std::cout << " Optimization: " << opt_<< std::endl;
+        std::cout << " Number of chains: " << nc_<< std::endl;
         std::cout << " Steps of contrastive divergence: " << cd_<< std::endl;
         std::cout << " Learning rate: " << lr_<< std::endl;
         std::cout << " L2 regularization: " << l2_<< std::endl;
