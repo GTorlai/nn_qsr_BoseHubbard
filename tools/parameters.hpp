@@ -30,6 +30,8 @@ public:
 
     //Number of hidden units
     int nh_;
+    //Number of visible units
+    int nv_;
     // Width of normal distribution for initial weights
     double w_;
     //Order of contrastive divergence
@@ -143,6 +145,10 @@ public:
         }
     }
     
+    void SetNumberVisible(int nv){
+        nv_=nv;
+    }
+
     //Print all the parameters on screen
     void PrintParameters(){
 
