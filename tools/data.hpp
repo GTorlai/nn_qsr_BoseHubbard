@@ -10,31 +10,27 @@ namespace tools{
 
 void LoadTrainingData(Parameters & p,Eigen::MatrixXd & trainSamples) 
 {
-    int train_size = int(0.9*p.Ns_);
-    trainSamples.resize(train_size,p.Ns_);
+    int train_size = p.Ns_;
+    trainSamples.resize(train_size,p.nsites_);
     std::ifstream samplesFile(tools::TrainingDataName(p));
     
     for (int n=0; n<train_size; n++) {
         for (int j=0; j<p.nsites_; j++) {
             samplesFile >> trainSamples(n,j);
-            //cout << trainBases[n][j] << " ";
         }
-        //cout << endl;
     }
 }
 
 void LoadTestingData(Parameters & p,Eigen::MatrixXd & trainSamples) 
 {
-    int train_size = int(0.9*p.Ns_);
-    trainSamples.resize(train_size,p.Ns_);
+    int train_size = int(0.1*p.Ns_);
+    trainSamples.resize(train_size,p.nsites_);
     std::ifstream samplesFile(tools::TestingDataName(p));
     
     for (int n=0; n<train_size; n++) {
         for (int j=0; j<p.nsites_; j++) {
             samplesFile >> trainSamples(n,j);
-            //cout << trainBases[n][j] << " ";
         }
-        //cout << endl;
     }
 }
 void LoadWavefunction(Parameters & p,Eigen::VectorXd & wf,int D){

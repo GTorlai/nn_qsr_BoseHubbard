@@ -23,7 +23,7 @@ std::string TrainingDataName(Parameters & p){
     fileName += "_S";
     fileName += boost::str(boost::format("%d") % p.Ns_);
     fileName += "_train.txt"; 
-    std::cout << fileName << std::endl;
+    //std::cout << fileName << std::endl;
     return fileName;
 }
 
@@ -41,8 +41,8 @@ std::string TestingDataName(Parameters & p){
     fileName += boost::str(boost::format("%.2f") % p.U_); 
     fileName += "_S";
     fileName += boost::str(boost::format("%d") % int(p.Ns_/10));
-    fileName += "_train.txt"; 
-    std::cout << fileName << std::endl;
+    fileName += "_test.txt"; 
+    //std::cout << fileName << std::endl;
     return fileName;
 }
 
@@ -50,13 +50,14 @@ std::string WavefunctionName(Parameters & p){
     std::string fileName;
     fileName = "../data/bosehubbard";
     fileName += boost::str(boost::format("%d") %p.d_) + "d/";
-    fileName += "wavefunctions/bosehubbard";
+    fileName += "wavefunctions/wavefunction_bosehubbard";
     fileName += boost::str(boost::format("%d") %p.d_) + "d_N";
     fileName += boost::str(boost::format("%d") % p.nsites_);
     fileName += "_M";
     fileName += boost::str(boost::format("%d") % p.M_);
     fileName += "_U" + boost::str(boost::format("%.2f") % p.U_);
     fileName += ".txt";
+    std::cout<<fileName<<std::endl;
     return fileName;
 }
 
