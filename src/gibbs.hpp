@@ -55,6 +55,10 @@ public:
         return rbm_;
     }
     
+    Eigen::VectorXd VisibleStateRow(int s){
+        return v_.row(s);
+    }
+
     //Set a state to a random binary value
     void RandomVals(Eigen::MatrixXd & hv){
         std::uniform_int_distribution<int> distribution(0,1);
@@ -104,7 +108,7 @@ public:
     }
 
     //Perform k steps of Gibbs sampling
-    void sample(int &steps){
+    void Sample(int steps){
         for(int k=0;k<steps;k++){
             rbm_.ProbHiddenGivenVisible(v_,probh_);
             SampleHidden(h_,probh_);

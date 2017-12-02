@@ -1,10 +1,7 @@
 #include <iostream>
 #include <Eigen/Dense>
-//#include <random>
-//#include <vector>
 #include <iomanip>
 #include <fstream>
-//#include <bitset>
 
 #ifndef QST_TOMOGRAPHY_HPP
 #define QST_TOMOGRAPHY_HPP
@@ -26,21 +23,21 @@ template<class Sampler,class Optimizer> class Tomography {
     int npar_;
     int bs_;
     int cd_;
+    int nc_;
     double Z_;
     double negative_log_likelihood_;
     double kl_divergence_;
     double overlap_;
-
     Eigen::MatrixXd grad_;
     Eigen::VectorXd deltaP_;
     Eigen::VectorXd wf_;
     
     std::mt19937 rgen_;
-    
-   
+
 public:
      
-    Tomography(Basis &basis,Sampler &sampler,Optimizer &optimizer,tools::Parameters &par):basis_(basis),rbm_(sampler.Rbm()),optimizer_(optimizer),sampler_(sampler){ 
+    Tomography(Basis &basis,Sampler &sampler,Optimizer &optimizer,tools::Parameters &par):
+        basis_(basis),rbm_(sampler.Rbm()),optimizer_(optimizer),sampler_(sampler){ 
         
         std::cout<<"- Initializing tomography module"<<std::endl;
         nv_ = rbm_.Nvisible();
@@ -51,11 +48,12 @@ public:
         npar_=rbm_.Npar();
         bs_ = par.bs_;
         cd_ = par.cd_;
-        
+        nc_ = par.nc_;
+
         optimizer_.SetNpar(npar_);
         grad_.resize(bs_,npar_);
         deltaP_.resize(npar_);
-        rbm_.SetBatchBiases(bs_);
+        rbm_.SetBatchBiases(nc_);
     }
 
     //Compute gradient of KL divergence 
@@ -67,9 +65,9 @@ public:
         }
         //Negative Phase driven by the model
         sampler_.SetVisibleLayer(batch);
-        sampler_.sample(cd_);
+        sampler_.Sample(cd_);
         for(int s=0;s<bs_;s++){
-            grad_.row(s) += rbm_.DerLog(sampler_.v_.row(s));
+            grad_.row(s) += rbm_.DerLog(sampler_.VisibleStateRow(s));//sampler_.v_.row(s));
         }
         optimizer_.getUpdates(grad_,deltaP_);
     }
@@ -77,17 +75,14 @@ public:
     //Compute gradient of KL divergence 
     void GradientFE(const Eigen::MatrixXd &batch){ 
         grad_.setZero();
-        Z_ = rbm_.ExactPartitionFunction();
+        Z_ = rbm_.ExactPartitionFunction(basis_);
         Eigen::VectorXd negative(npar_);
         negative.setZero(npar_);
         for(int i=0;i<D_;i++){
             negative += rbm_.amplitude(basis_.states_bin_.row(i))*rbm_.amplitude(basis_.states_bin_.row(i))*rbm_.DerLog(basis_.states_bin_.row(i))/Z_;
-            //for (int p=0;p<npar_;p++){
-            //    negative(p) += rbm_.amplitude(basis_states_bin_.row(i))*rbm_.amplitude(basis_states_bin_.row(i))*rbm_.DerLog(basis_states_bin_.row(i))(p)/Z_;
-            //    //negative(p) += rbm_.amplitude(sample_bin)*rbm_.amplitude(sample_bin)*rbm_.DerLog(sample_bin)(p)/Z_;
-            //}
         }
         for(int s=0;s<bs_;s++){
+            grad_.row(s) -= rbm_.DerLog(batch.row(s));
             grad_.row(s) += negative;
         }
         optimizer_.getUpdates(grad_,deltaP_);
@@ -99,7 +94,7 @@ public:
         auto pars=rbm_.GetParameters();
         optimizer_.Update(deltaP_,pars);
         rbm_.SetParameters(pars);
-        rbm_.SetBatchBiases(bs_);
+        rbm_.SetBatchBiases(nc_);
     }
 
     //Run the tomography
@@ -111,7 +106,7 @@ public:
         std::uniform_int_distribution<int> distribution(0,trainSet.rows()-1);
         int saveFrequency = 10;
         
-        int ntest = 10000;
+        int ntest = 100;
         double best_overlap=0.0;
         double best_nll=1000.0;
 
@@ -134,17 +129,21 @@ public:
             
             if (counter == saveFrequency){
                 if (nsites_<10){
-                    Z_ = rbm_.ExactPartitionFunction(); 
+                    Z_ = rbm_.ExactPartitionFunction(basis_); 
                     ExactKL();
                     Overlap();
+                    NLL(nll_test);
+                    if (negative_log_likelihood_<best_nll){
+                        best_overlap = overlap_;
+                        best_nll = negative_log_likelihood_;
+                    }
+                    PrintStats(i,best_overlap);
+                    counter = 0;
                 }
-                NLL(nll_test);
-                if (negative_log_likelihood_<best_nll){
-                    best_overlap = overlap_;
-                    best_nll = negative_log_likelihood_;
+                else{
+                    std::cout<<"Epoch: "<<i<<std::endl;
                 }
-                PrintStats(i,best_overlap);
-                counter = 0;
+
             }
             counter++;
         }
@@ -154,7 +153,7 @@ public:
     void Overlap(){
         overlap_ = 0.0;
         for(int i=0;i<D_;i++){
-            overlap_ += wf_(i)*rbm_.amplitude(basis_.states_bin_.row(i))/Z_;
+            overlap_ += wf_(i)*rbm_.amplitude(basis_.states_bin_.row(i))/sqrt(Z_);
         }
     }
 
@@ -175,11 +174,13 @@ public:
         negative_log_likelihood_ /= double(samples.rows());
     }
 
-    //Set the value of the target wavefunction
+    //Set the value of the target wavefunction,
     void setWavefunction(Eigen::VectorXd & psi){
+        wf_.resize(D_);
         for(int i=0;i<D_;i++){
             wf_(i) = psi(i);
         }
+        std::cout<<wf_<<std::endl;
     }
     
     //Print observer

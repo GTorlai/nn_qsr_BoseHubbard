@@ -85,6 +85,7 @@ public:
         for(int i=0;i<D_;i++){
             tools::MultinomialToBinomial(nsites_,M_,states_mul_.row(i),state);
             states_bin_.row(i) = state;
+            //std::cout<<states_bin_.row(i)<<std::endl;
         }
     }
     

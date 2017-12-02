@@ -33,10 +33,7 @@ class Rbm{
     Eigen::MatrixXd cBatch_;
 
     Eigen::VectorXd lnthetas_;
-    //Eigen::VectorXd thetasnew_;
-    //Eigen::VectorXd lnthetasnew_;
     
-    int D_;
     //Random number generator 
     std::mt19937 rgen_;
     
@@ -91,6 +88,7 @@ public:
     //Conditional Probabilities 
     void ProbHiddenGivenVisible(const Eigen::MatrixXd &v,Eigen::MatrixXd &probs){
         tools::logistic(v*W_.transpose()+cBatch_,probs);
+        //std::cout << probs << std::endl;
     }
     void ProbVisibleGivenHidden(const Eigen::MatrixXd & h,Eigen::MatrixXd & probs){
         Eigen::MatrixXd activations(h.rows(),nv_);
@@ -110,6 +108,7 @@ public:
                 }
             }
         }
+        //std::cout << probs << std::endl<<std::endl;
     }
 
     //Compute derivative of log-probability
@@ -150,10 +149,8 @@ public:
     //Compute the partition function by exact enumeration 
     double ExactPartitionFunction(const Basis &basis) {
         double Z=0.0;
-        Eigen::VectorXd v_bin(nsites_);
-        for(int i=0;i<D_;i++){
-            //mult_to_bin(basis_states_.row(i),v_bin);
-            Z += exp(LogVal(basis.states_bin_.row(i)));//basis_states_.row(i)));
+        for(int i=0;i<basis.states_bin_.rows();i++){
+            Z += exp(LogVal(basis.states_bin_.row(i)));
         }
         return Z;
     }
@@ -204,14 +201,15 @@ public:
     }
 
     //Set the Biases matrices for batch sampling
-    void SetBatchBiases(const int & bs) {
-        bBatch_.resize(bs,nv_);
-        cBatch_.resize(bs,nh_);
-        for(int s=0;s<bs;s++) {
+    void SetBatchBiases(const int & rows) {
+        bBatch_.resize(rows,nv_);
+        cBatch_.resize(rows,nh_);
+        for(int s=0;s<rows;s++) {
             bBatch_.row(s) = b_;
             cBatch_.row(s) = c_;
         }
     }
+
 };
 }
 
