@@ -2,7 +2,6 @@
 #include <Eigen/Dense>
 #include <iomanip>
 #include <fstream>
-
 #ifndef QST_TOMOGRAPHY_HPP
 #define QST_TOMOGRAPHY_HPP
 
@@ -14,6 +13,7 @@ template<class Sampler,class Optimizer> class Tomography {
     Rbm & rbm_;
     Sampler & sampler_;
     Optimizer & optimizer_;
+    Observer & observer_;
 
     int nv_;
     int nh_;
@@ -36,15 +36,18 @@ template<class Sampler,class Optimizer> class Tomography {
 
 public:
      
-    Tomography(Basis &basis,Sampler &sampler,Optimizer &optimizer,tools::Parameters &par):
-        basis_(basis),rbm_(sampler.Rbm()),optimizer_(optimizer),sampler_(sampler){ 
+    Tomography(Basis &basis,Sampler &sampler,Optimizer &optimizer,
+               tools::Parameters &par,Observer &observer):
+        basis_(basis),rbm_(sampler.Rbm()),
+        optimizer_(optimizer),sampler_(sampler),
+        observer_(observer){ 
         
         std::cout<<"- Initializing tomography module"<<std::endl;
         nv_ = rbm_.Nvisible();
         nh_ = rbm_.Nhidden();
         nsites_ = basis_.Nsites();
         M_ = basis_.Nbosons();
-        D_ = basis.Dimension();
+        D_ = basis_.Dimension();
         npar_=rbm_.Npar();
         bs_ = par.bs_;
         cd_ = par.cd_;
@@ -130,14 +133,14 @@ public:
             if (counter == saveFrequency){
                 if (nsites_<10){
                     Z_ = rbm_.ExactPartitionFunction(basis_); 
-                    ExactKL();
-                    Overlap();
-                    NLL(nll_test);
-                    if (negative_log_likelihood_<best_nll){
-                        best_overlap = overlap_;
-                        best_nll = negative_log_likelihood_;
+                    observer_.ExactKL(Z_);
+                    observer_.Overlap(Z_);
+                    observer_.NLL(nll_test,Z_);
+                    if (observer_.negative_log_likelihood_<best_nll){
+                        best_overlap = observer_.overlap_;
+                        best_nll = observer_.negative_log_likelihood_;
                     }
-                    PrintStats(i,best_overlap);
+                    observer_.PrintStats(i,best_overlap);
                     counter = 0;
                 }
                 else{
@@ -148,50 +151,6 @@ public:
             counter++;
         }
     }
-    
-    //Compute the overlap
-    void Overlap(){
-        overlap_ = 0.0;
-        for(int i=0;i<D_;i++){
-            overlap_ += wf_(i)*rbm_.amplitude(basis_.states_bin_.row(i))/sqrt(Z_);
-        }
-    }
-
-    //Compute KL divergence exactly
-    void ExactKL(){
-        kl_divergence_ = 0.0;
-        for(int i=0;i<D_;i++){
-            kl_divergence_ += wf_(i)*wf_(i)*log(wf_(i)*(wf_(i)));
-            kl_divergence_ += wf_(i)*wf_(i)*(log(Z_) - rbm_.LogVal(basis_.states_bin_.row(i)));
-        }
-    }
-    
-    void NLL(Eigen::MatrixXd & samples) {
-        negative_log_likelihood_=0.0;
-        for (int k=0;k<samples.rows();k++){
-            negative_log_likelihood_ -=log(rbm_.amplitude(samples.row(k))*rbm_.amplitude(samples.row(k))/Z_);
-        }
-        negative_log_likelihood_ /= double(samples.rows());
-    }
-
-    //Set the value of the target wavefunction,
-    void setWavefunction(Eigen::VectorXd & psi){
-        wf_.resize(D_);
-        for(int i=0;i<D_;i++){
-            wf_(i) = psi(i);
-        }
-        std::cout<<wf_<<std::endl;
-    }
-    
-    //Print observer
-    void PrintStats(int i,double best_overlap){
-        std::cout << "Epoch: " << i << "\t";     
-        std::cout << "KL = " << std::setprecision(10) << kl_divergence_ << "\t";
-        std::cout << "NLL = " << std::setprecision(10) << negative_log_likelihood_ << "\t";
-        std::cout << "Overlap = " << std::setprecision(10) << overlap_<< "\t";//<< Fcheck_;
-        std::cout << "Best overlap = " << std::setprecision(10) << best_overlap;// << "\t" << Fcheck_;
-        std::cout << std::endl;
-    } 
 };
 }
 
