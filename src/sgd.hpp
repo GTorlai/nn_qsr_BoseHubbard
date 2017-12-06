@@ -42,10 +42,9 @@ public:
         }
     }
     
-    void getUpdates(const Eigen::MatrixXd & derLog, Eigen::VectorXd & deltaP){
+    void getUpdates(const Eigen::VectorXd & derLog, Eigen::VectorXd & deltaP){
       
-        deltaP = derLog.colwise().mean();
-        //cout << deltaP << endl<<endl;
+        deltaP = derLog;
     }
     
     void Reset(){

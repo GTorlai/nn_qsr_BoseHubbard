@@ -8,6 +8,18 @@
 
 namespace tools{
 
+void LoadBasis(int D,Parameters & p,Eigen::MatrixXd & basis) 
+{
+    basis.resize(D,p.nsites_);
+    std::ifstream basisFile(tools::BasisName(p));
+    
+    for (int n=0; n<D; n++) {
+        for (int j=0; j<p.nsites_; j++) {
+            basisFile >> basis(n,j);
+        }
+    }
+}
+
 void LoadTrainingData(Parameters & p,Eigen::MatrixXd & trainSamples) 
 {
     int train_size = p.Ns_;

@@ -41,6 +41,14 @@ inline void MultinomialToBinomial(const int &nsites, const int &M, const Eigen::
     }
 }
 
+////Convert multinomial state into binomial state
+//inline void MultinomialToBinomial(const int &nsites, const int &M, const Eigen::VectorXd &vmul, Eigen::MatrixXf::RowXpr myrow)
+//{
+//    vbin.setZero();
+//    for(auto n=0;n<nsites;++n){
+//        vbin((M+1)*n+int(vmul(n))) = 1;
+//    }
+//}
 //Logistic functions 
 inline double logistic(double x){
     return 1./(1.+std::exp(-x));

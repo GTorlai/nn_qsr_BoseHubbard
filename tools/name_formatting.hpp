@@ -8,6 +8,22 @@
 
 namespace tools{
 
+std::string BasisName(Parameters & p){
+
+    std::string fileName;
+    fileName = "../data/bosehubbard";
+    fileName += boost::str(boost::format("%d") %p.d_) + "d/";
+    fileName += "bases/basis_bosehubbard";
+    fileName += boost::str(boost::format("%d") %p.d_) + "d_N";
+    fileName += boost::str(boost::format("%d") % p.nsites_);
+    fileName += "_M";
+    fileName += boost::str(boost::format("%d") % p.M_);
+    fileName += "_Mmax";
+    fileName += boost::str(boost::format("%d") % p.M_max_);
+    fileName += ".txt"; 
+    return fileName;
+}
+
 std::string TrainingDataName(Parameters & p){
 
     std::string fileName;
@@ -18,6 +34,8 @@ std::string TrainingDataName(Parameters & p){
     fileName += boost::str(boost::format("%d") % p.nsites_);
     fileName += "_M";
     fileName += boost::str(boost::format("%d") % p.M_);
+    fileName += "_Mmax";
+    fileName += boost::str(boost::format("%d") % p.M_max_);
     fileName += "_U";
     fileName += boost::str(boost::format("%.2f") % p.U_); 
     fileName += "_S";
@@ -37,6 +55,8 @@ std::string TestingDataName(Parameters & p){
     fileName += boost::str(boost::format("%d") % p.nsites_);
     fileName += "_M";
     fileName += boost::str(boost::format("%d") % p.M_);
+    fileName += "_Mmax";
+    fileName += boost::str(boost::format("%d") % p.M_max_);
     fileName += "_U";
     fileName += boost::str(boost::format("%.2f") % p.U_); 
     fileName += "_S";
@@ -55,6 +75,8 @@ std::string WavefunctionName(Parameters & p){
     fileName += boost::str(boost::format("%d") % p.nsites_);
     fileName += "_M";
     fileName += boost::str(boost::format("%d") % p.M_);
+    fileName += "_Mmax";
+    fileName += boost::str(boost::format("%d") % p.M_max_);
     fileName += "_U" + boost::str(boost::format("%.2f") % p.U_);
     fileName += ".txt";
     std::cout<<fileName<<std::endl;
@@ -68,8 +90,11 @@ std::string NetworkName(Parameters & p){
     fileName += boost::str(boost::format("%d") %p.d_) + "d";
     fileName += "_N" + boost::str(boost::format("%d") % p.nsites_);
     fileName += "_M" + boost::str(boost::format("%d") % p.M_);
+    fileName += "_Mmax" + boost::str(boost::format("%d") % p.M_max_);
     fileName += "_nv" + boost::str(boost::format("%d") % p.nv_);
     fileName += "_nh" + boost::str(boost::format("%d") % p.nh_);
+    fileName += "_" + p.alg_;
+    fileName += boost::str(boost::format("%d") % p.cd_); 
     fileName += "_" + p.opt_;
     fileName += "_lr";
     if (p.lr_ > 0.09) {

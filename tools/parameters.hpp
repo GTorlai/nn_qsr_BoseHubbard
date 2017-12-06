@@ -19,6 +19,8 @@ public:
     int nsites_;
     //Number of bosons
     int M_;
+    //Number of bosons
+    int M_max_;
     //Lattice Dimensions
     int d_;
     //On-site interaction strength
@@ -38,6 +40,8 @@ public:
     int cd_;
     //Number of chains
     int nc_;
+    //Number of chains
+    int nrep_;
     //Learning rate
     double lr_;
     //L2 normalization
@@ -53,29 +57,35 @@ public:
     
     //Optimization algorithm
     std::string opt_;
+    //Sampling algorithm
+    std::string alg_;
     //Model name
     std::string model_;
 
     Parameters() {
+        
         //Initialize parameter
-        nsites_ = 2;
-        M_ = 2;
-        d_ = 1;
-        U_ = 1.0;
-        t_ = 1.0;
+        nsites_ = 6;
+        M_  = 6;
+        M_max_=3;
+        d_  = 1;
+        U_  = 0.5;
+        t_  = 1.0;
         mu_ = 0.0;
 
-        nh_ = 2;
-        w_ = 0.01;
+        nh_ = 24;
+        w_  = 0.01;
         cd_ = 10;
         nc_ = 10;
-        lr_ = 0.01;
+        nrep_ = 10;
+        lr_ = 0.001;
         l2_ = 0.0;
-        bs_ = 100;
-        ep_=100000;
-        Ns_ = 0;
+        bs_ = 10;
+        ep_ = 100000;
+        Ns_ = 10000;
         lambda_=0.0;
         opt_ = "sgd";
+        alg_ = "";    
         model_="";
     }
     
@@ -83,7 +93,7 @@ public:
     void ReadParameters(int argc,char** argv){
         std::string flag;
         
-        flag = "-nsites";
+        flag = "-N";
         for(int i=2;i<argc;i++){
             if(flag==argv[i]) nsites_=atoi(argv[i+1]);
         }
@@ -94,6 +104,10 @@ public:
         flag = "-M";
         for(int i=2;i<argc;i++){
             if(flag==argv[i]) M_=atoi(argv[i+1]);
+        }
+        flag = "-M_max";
+        for(int i=2;i<argc;i++){
+            if(flag==argv[i]) M_max_=atoi(argv[i+1]);
         }
         flag = "-U";
         for(int i=2;i<argc;i++){
@@ -110,6 +124,10 @@ public:
         flag = "-nc";
         for(int i=2;i<argc;i++){
             if(flag==argv[i]) nc_=atoi(argv[i+1]);
+        }
+        flag = "-nrep";
+        for(int i=2;i<argc;i++){
+            if(flag==argv[i]) nrep_=atoi(argv[i+1]);
         }
         flag = "-cd";
         for(int i=2;i<argc;i++){
@@ -138,10 +156,6 @@ public:
         flag = "-lambda";
         for(int i=2;i<argc;i++){
             if(flag==argv[i]) lambda_=double(atof(argv[i+1]));
-        }
-        flag = "-opt";
-        for(int i=2;i<argc;i++){
-            if(flag==argv[i]) opt_=argv[i+1];
         }
     }
     

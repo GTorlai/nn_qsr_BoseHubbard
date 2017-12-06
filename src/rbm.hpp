@@ -1,77 +1,62 @@
 #ifndef QST_RBM_HPP
 #define QST_RBM_HPP
-
 #include <iostream>
 #include <Eigen/Dense>
 #include <random>
-//#include <fstream>
-//#include <vector>
-//#include <iomanip>
-//#include <bitset>
 
 namespace qst{
 
 class Rbm{
 
-    //number of visible units
-    int nv_;
-    //number of hidden units
-    int nh_;
-    //Number of p
-    int M_;
-    // Number of sites
-    int nsites_;
-    //number of parameters
-    int npar_;
-    //weights
-    Eigen::MatrixXd W_;
-    //visible units bias
-    Eigen::VectorXd b_;
-    Eigen::MatrixXd bBatch_;
-    //hidden units bias
-    Eigen::VectorXd c_;
-    Eigen::MatrixXd cBatch_;
-
-    Eigen::VectorXd lnthetas_;
-    
-    //Random number generator 
-    std::mt19937 rgen_;
+    int nv_;                    //number of visible units
+    int nh_;                    //number of hidden units
+    int M_;                     //maximum site occupancy
+    int nsites_;                //number of sites
+    int npar_;                  //number of parameters
+    Eigen::MatrixXd W_;         //weights
+    Eigen::VectorXd b_;         //visible fields
+    Eigen::VectorXd c_;         //hidden fields
+    Eigen::VectorXd lnthetas_;  //sigmoid estimator
+    std::mt19937 rgen_;         //Random number generator
     
 public:
-    Rbm(tools::Parameters &par):nsites_(par.nsites_),M_(par.M_),nh_(par.nh_),c_(par.nh_),lnthetas_(par.nh_){
-       
+    Rbm(tools::Parameters &par):nsites_(par.nsites_),
+                                M_(par.M_max_),
+                                nh_(par.nh_){
+        //std::cout<<"- Initializing rbm with "<<nv_<<" visible units";
+        //std::cout<<" and "<<nh_<<" hidden units"<<std::endl;
         nv_ = (M_+1)*nsites_;
         npar_=nv_+nh_+nv_*nh_;
-
-        std::random_device rd;
+        //std::random_device rd;
         //rgen_.seed(rd());
         rgen_.seed(13579);
-        
-        W_.setZero(nh_,nv_);
-        b_.setZero(nv_);
-        c_.setZero(nh_);
-    
-        std::cout<<"- Initializing rbm with "<<nv_<<" visible units";
-        std::cout<<" and "<<nh_<<" hidden units"<<std::endl;
+        W_.resize(nh_,nv_);
+        b_.resize(nv_);
+        c_.resize(nh_);
+        lnthetas_.resize(nh_);
     }
- 
-    int Nvisible()const{
+
+    //Private members access functions
+    inline int Nvisible()const{
         return nv_;
     }
-    int Nhidden()const{
+    inline int Nhidden()const{
         return nh_;
     }
-    int Nsites()const{
+    inline int Nsites()const{
         return nsites_;
     }
-    int Npar()const{
+    inline int MaxNbosons()const{
+        return M_;
+    }
+    inline int Npar()const{
         return npar_;
     }
-    
+   
+    //Initialize the network parameters
     void InitRandomPars(int seed,double sigma){
         std::default_random_engine generator(seed);
         std::normal_distribution<double> distribution(0,sigma);
-        
         for(int i=0;i<nh_;i++){
             for(int j=0;j<nv_;j++){
                 W_(i,j)=distribution(generator);
@@ -84,39 +69,11 @@ public:
             c_(i)=distribution(generator);
         }
     }
-    
-    //Conditional Probabilities 
-    void ProbHiddenGivenVisible(const Eigen::MatrixXd &v,Eigen::MatrixXd &probs){
-        tools::logistic(v*W_.transpose()+cBatch_,probs);
-        //std::cout << probs << std::endl;
-    }
-    void ProbVisibleGivenHidden(const Eigen::MatrixXd & h,Eigen::MatrixXd & probs){
-        Eigen::MatrixXd activations(h.rows(),nv_);
-        activations = h*W_+bBatch_;
-        Eigen::VectorXd one_site_activations(M_+1);
-        Eigen::VectorXd one_site_probs(M_+1);
-        for(int s=0;s<h.rows();s++){
-            for (int n=0;n<nsites_;n++){
-                //TODO OPTIMIZE
-                //one_site_activations = activations.block(s,(M_+1)*n,s,(M_+1)*n+M_);
-                for(int m=0;m<M_+1;m++){
-                    one_site_activations(m) = activations(s,(M_+1)*n+m);
-                }
-                tools::softmax(one_site_activations,one_site_probs);
-                for(int m=0;m<M_+1;m++){
-                    probs(s,(M_+1)*n+m) = one_site_probs(m);
-                }
-            }
-        }
-        //std::cout << probs << std::endl<<std::endl;
-    }
 
     //Compute derivative of log-probability
     Eigen::VectorXd DerLog(const Eigen::VectorXd & v){
         Eigen::VectorXd der(npar_);
-        //der.setZero();
         int p=0;
-       
         tools::logistic(W_*v+c_,lnthetas_);
         for(int i=0;i<nh_;i++){
             for(int j=0;j<nv_;j++){
@@ -128,34 +85,52 @@ public:
             der(p)=v(j);
             p++;
         }
-        
         for(int i=0;i<nh_;i++){
             der(p)=lnthetas_(i);
             p++;
         } 
         return der;
     }
-    
-    double amplitude(const Eigen::VectorXd & v){
+   
+    //Return the wavefunction's amplitude
+    inline double psi(const Eigen::VectorXd & v){
         return exp(0.5*LogVal(v));
     }
     
     //Value of the logarithm of the RBM probability
-    double LogVal(const Eigen::VectorXd & v){
+    inline double LogVal(const Eigen::VectorXd & v){
         tools::ln1pexp(W_*v+c_,lnthetas_);
         return v.dot(b_)+lnthetas_.sum();
     }
     
-    //Compute the partition function by exact enumeration 
-    double ExactPartitionFunction(const Basis &basis) {
-        double Z=0.0;
-        for(int i=0;i<basis.states_bin_.rows();i++){
-            Z += exp(LogVal(basis.states_bin_.row(i)));
-        }
-        return Z;
+    //RBM Energy
+    inline double Energy(const Eigen::VectorXd & v, const Eigen::VectorXd & h){
+        return -h.dot(W_*v)-b_.dot(v)-c_.dot(h);
     }
- 
-    // UTITILIES FUNCTIONS
+
+    //Conditional Probabilities 
+    void ProbHiddenGivenVisible(const Eigen::MatrixXd &v,Eigen::MatrixXd &probs){
+        tools::logistic((v*W_.transpose()).rowwise() + c_.transpose(),probs);
+    }
+    void ProbVisibleGivenHidden(const Eigen::MatrixXd & h,Eigen::MatrixXd & probs){
+        Eigen::MatrixXd activations(h.rows(),nv_);
+        //activations = h*W_+bBatch_;
+        activations = (h*W_).rowwise() + b_.transpose();
+        Eigen::VectorXd one_site_activations(M_+1);
+        Eigen::VectorXd one_site_probs(M_+1);
+        for(int s=0;s<h.rows();s++){
+            for (int n=0;n<nsites_;n++){
+                for(int m=0;m<M_+1;m++){
+                    one_site_activations(m) = activations(s,(M_+1)*n+m);
+                }
+                tools::softmax(one_site_activations,one_site_probs);
+                for(int m=0;m<M_+1;m++){
+                    probs(s,(M_+1)*n+m) = one_site_probs(m);
+                }
+            }
+        }
+    }
+    
     //Get RBM parameters
     Eigen::VectorXd GetParameters(){
         Eigen::VectorXd pars(npar_);
@@ -166,12 +141,10 @@ public:
                 p++;
             }
         }
-        
         for(int j=0;j<nv_;j++){
             pars(p)=b_(j);
             p++;
         }
-        
         for(int i=0;i<nh_;i++){
             pars(p)=c_(i);
             p++;
@@ -188,29 +161,25 @@ public:
                 p++;
             }
         }
-        
         for(int j=0;j<nv_;j++){
             b_(j)=pars(p);
             p++;
         }
-        
         for(int i=0;i<nh_;i++){
             c_(i)=pars(p);
             p++;
         }
     }
-
-    //Set the Biases matrices for batch sampling
-    void SetBatchBiases(const int & rows) {
-        bBatch_.resize(rows,nv_);
-        cBatch_.resize(rows,nh_);
-        for(int s=0;s<rows;s++) {
-            bBatch_.row(s) = b_;
-            cBatch_.row(s) = c_;
-        }
+   
+    //Print the weights
+    void PrintWeights(){
+        std::cout<<W_<<std::endl;
+        std::cout<<b_.transpose()<<std::endl;
+        std::cout<<c_.transpose()<<std::endl;
+        std::cout<<std::endl<<std::endl;
     }
 
-};
+ };
 }
 
 #endif
