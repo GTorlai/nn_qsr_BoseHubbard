@@ -13,6 +13,7 @@ class Observer{
     Basis & basis_;
     Rbm & rbm_;
     ParallelTempering & pt_;
+    AIS & ais_;
 
     int nv_;
     int nh_;
@@ -33,7 +34,7 @@ class Observer{
 public:
 
      
-    Observer(Basis &basis,Rbm &rbm, ParallelTempering & pt):basis_(basis),rbm_(rbm),pt_(pt){ 
+    Observer(Basis &basis,Rbm &rbm, ParallelTempering & pt,AIS &ais):basis_(basis),rbm_(rbm),pt_(pt),ais_(ais){ 
         
         std::cout<<"- Initializing observer module"<<std::endl;
         nv_ = rbm_.Nvisible();
@@ -99,8 +100,10 @@ public:
         std::cout << "Epoch: " << i << "\t";
         ExactPartitionFunction();
         std::cout << "Exact logZ = " << std::setprecision(10) << logZ_ << "\t";
-        logZ_ = pt_.ComputeLogPartitionFunction(infiniteT_Z_);
-        std::cout << "PT logZ = " << std::setprecision(10) << logZ_<< "\t";
+        //logZ_ = pt_.ComputeLogPartitionFunction(infiniteT_Z_);
+        //std::cout << "PT logZ = " << std::setprecision(10) << logZ_<< "\t";
+        logZ_ = ais_.ComputeLogPartitionFunction();
+        std::cout << "AIS logZ = " << std::setprecision(10) << logZ_<< "\t";
         std::cout<<std::endl;
     }
 

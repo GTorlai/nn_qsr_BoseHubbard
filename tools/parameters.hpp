@@ -65,22 +65,22 @@ public:
     Parameters() {
         
         //Initialize parameter
-        nsites_ = 6;
-        M_  = 6;
-        M_max_=3;
+        nsites_ = 5;
+        M_  = 5;
+        M_max_=5;
         d_  = 1;
         U_  = 0.5;
         t_  = 1.0;
         mu_ = 0.0;
 
-        nh_ = 24;
+        nh_ = 36;
         w_  = 0.01;
         cd_ = 10;
         nc_ = 10;
-        nrep_ = 10;
-        lr_ = 0.001;
+        nrep_ = 100;
+        lr_ = 0.01;
         l2_ = 0.0;
-        bs_ = 10;
+        bs_ = 100;
         ep_ = 100000;
         Ns_ = 10000;
         lambda_=0.0;

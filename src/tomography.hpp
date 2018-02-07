@@ -109,8 +109,8 @@ public:
             //Compute stuff and print
             if (counter == saveFrequency){
                 //rbm_.PrintWeights();
-                //observer_.Scan(i,nll_test);
-                observer_.ComparePartitionFunctions(i);
+                observer_.Scan(i,nll_test);
+                //observer_.ComparePartitionFunctions(i);
                 counter = 0;
             }
             counter++;

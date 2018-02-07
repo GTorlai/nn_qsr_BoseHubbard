@@ -79,7 +79,7 @@ std::string WavefunctionName(Parameters & p){
     fileName += boost::str(boost::format("%d") % p.M_max_);
     fileName += "_U" + boost::str(boost::format("%.2f") % p.U_);
     fileName += ".txt";
-    std::cout<<fileName<<std::endl;
+    //std::cout<<fileName<<std::endl;
     return fileName;
 }
 
