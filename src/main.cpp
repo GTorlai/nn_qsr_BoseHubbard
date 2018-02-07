@@ -52,7 +52,7 @@ int main(int argc, char* argv[]){
     //par.alg_="PT";
 
     //---- OBSERVER ----//
-    qst::ParallelTempering pt(rbm,par.nsites_,par.M_max_,par.nc_,2);//par.nrep_);
+    qst::ParallelTempering pt(rbm,par.nsites_,par.M_max_,par.nc_,par.nrep_);
     qst::AIS ais(rbm,par.nsites_,par.M_max_,par.nc_,par.nrep_);
     qst::Observer observer(basis,rbm,pt,ais);
     

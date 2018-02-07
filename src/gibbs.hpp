@@ -28,7 +28,7 @@ public:
                                                   nsites_(nsites),
                                                   M_(M),
                                                   nchains_(nchains){
-        std::cout<<"- Initializing the sampler: Gibbs"<<std::endl;
+        //std::cout<<"- Initializing the sampler: Gibbs"<<std::endl;
         nv_ = rbm_.Nvisible();
         nh_ = rbm_.Nhidden();
         v_.resize(nchains_,nv_);

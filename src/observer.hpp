@@ -36,7 +36,7 @@ public:
      
     Observer(Basis &basis,Rbm &rbm, ParallelTempering & pt,AIS &ais):basis_(basis),rbm_(rbm),pt_(pt),ais_(ais){ 
         
-        std::cout<<"- Initializing observer module"<<std::endl;
+        //std::cout<<"- Initializing observer module"<<std::endl;
         nv_ = rbm_.Nvisible();
         D_ = basis_.Dimension();
         npar_ = rbm_.Npar();

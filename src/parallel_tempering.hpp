@@ -26,7 +26,7 @@ public:
     ParallelTempering(Rbm & rbm,int nsites,int M,int nchains,int nreplicas):rbm_(rbm),
                                                               rbms_(nreplicas,rbm){
   
-        std::cout<<"- Initializing the sampler: Parallel Tempering"<<std::endl;
+        //std::cout<<"- Initializing the sampler: Parallel Tempering"<<std::endl;
         nchains_ = nchains;
         nreplicas_ = nreplicas;
         beta_.resize(nreplicas_);
@@ -43,7 +43,7 @@ public:
             rbms_[r].SetParameters(par*beta_(r));
             gibbs_.push_back(Gibbs(rbms_[r],nsites,M,nchains_));
         }
-        std::cout<<"- Initializing the sampler: DONE"<<std::endl;
+        //std::cout<<"- Initializing the sampler: DONE"<<std::endl;
     }
     
     int Nchains()const{

@@ -24,7 +24,7 @@ public:
 
     Sgd(double eta,double momentum,double l2reg,double dropout_p):eta_(eta),l2reg_(l2reg),dropout_p_(dropout_p),momentum_(momentum){
         npar_=-1;
-        std::cout<<"- Initializing the optimizer as: SGD"<<std::endl;
+        //std::cout<<"- Initializing the optimizer as: SGD"<<std::endl;
     }
     
     void SetNpar(int npar){

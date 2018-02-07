@@ -46,7 +46,7 @@ public:
     //Constructor
     AIS(Rbm & rbm,int nsites,int M,int nchains,int nreplicas):rbm_(rbm){//,rbms_(nchains,rbm){
   
-        std::cout<<"- Initializing the AIS"<<std::endl;
+        //std::cout<<"- Initializing the AIS"<<std::endl;
         nv_=rbm_.Nvisible();
         nh_=rbm_.Nhidden();
         nh_br_=0;//nh_;
